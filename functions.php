@@ -1,39 +1,51 @@
-<?php
-/**
- * theme main functions file
- */
+<?
 
 // register functions
+require_once( get_template_directory() . '/page_meta_fields.php'); // customizer functions
 require_once( get_template_directory() . '/customizer.php'); // customizer functions
 
 
+
 // register options
-function theme_post_thumbnails() {
-	add_theme_support( 'custom-background' );
-    add_theme_support( 'custom-header' );
+function smoothie_theme_support() {
+    // https://developer.wordpress.org/reference/functions/add_theme_support/
+	add_theme_support( 'custom-background' ); // https://codex.wordpress.org/Custom_Headers#Adding_Theme_Support
+    add_theme_support( 'custom-header' ); // https://codex.wordpress.org/Custom_Headers#Adding_Theme_Support
     add_theme_support( 'post-thumbnails' );
 }
-add_action( 'after_setup_theme', 'theme_post_thumbnails' );
+add_action( 'after_setup_theme', 'smoothie_theme_support' );
 
 // register menu's
-function basic_setup_register_menus() {
+function smoothie_register_menus() {
 	register_nav_menus(
 		array(
-		'top' => __( 'Top menu' , 'resource' ),
-		'main' => __( 'Main menu' , 'resource' ),
-		'side' => __( 'Side menu' , 'resource' ),
-		'bottom' => __( 'Bottom menu' , 'resource' )
+		'top' => __( 'Top menu' , 'smoothie' ),
+		'main' => __( 'Main menu' , 'smoothie' ),
+		'side' => __( 'Side menu' , 'smoothie' ),
+		'bottom' => __( 'Bottom menu' , 'smoothie' )
 		)
 	);
 }
-add_action( 'init', 'basic_setup_register_menus' );
+add_action( 'init', 'smoothie_register_menus' );
+// register style sheet
+function smoothie_theme_stylesheet(){
+    $stylesheet = get_template_directory_uri().'/style.css';
+    echo '<link rel="stylesheet" id="wp-theme-main-style"  href="'.$stylesheet.'" type="text/css" media="all" />';
+}
+add_action( 'wp_head', 'smoothie_theme_stylesheet', 9999 );
+// register style sheet function for editor
+function smoothie_editor_styles() {
+    add_editor_style( 'style.css' );
+}
+add_action( 'admin_init', 'smoothie_editor_styles' );
 
-// activate the Links Manager:: add_filter( 'pre_option_link_manager_enabled', '__return_true' );
-
-// register widgets
+/* Register widgets */
 function basic_setup_widgets_init() {
 	if (function_exists('register_sidebar')) {
-        // Not using the default wordpress widget, keep the widget slot for management (repositioning options)
+
+   /* Not using the the default wordpress widget,
+        keep the widget slot for management (repositioning options) */
+
 		register_sidebar(array(
 			'name' => 'Widgets Header',
 			'id'   => 'widgets-header',
@@ -43,39 +55,327 @@ function basic_setup_widgets_init() {
 			'before_title'  => '<h3>',
 			'after_title'   => '</h3>'
 		));
-		// Topcontent main widgets
-		register_sidebar(array(
-			'name' => 'Widgets Top',
-			'id'   => 'widgets-top-sidebar',
-			'description'   => 'This the widgetized area in the top sidebar.',
+
+        register_sidebar(array(
+			'name' => 'Widgets Intro',
+			'id'   => 'widgets-intro',
+			'description'   => 'This is page intro widgetized area.',
 			'before_widget' => '<div id="%1$s" class="widget %2$s"><div class="widgetpadding">',
 			'after_widget'  => '<div class="clr"></div></div></div>',
 			'before_title'  => '<h3>',
 			'after_title'   => '</h3>'
 		));
-		// Maincontent sidebar widgets
-		register_sidebar(array(
-			'name' => 'Widgets Sidebar',
-			'id'   => 'sidebar',
-			'description'   => 'This is the standard wordpress widgetized sidebar area.',
+        register_sidebar(array(
+			'name' => 'Widgets Intro Sub',
+			'id'   => 'widgets-intro-sub',
+			'description'   => 'This is page intro Sub widgetized area.',
 			'before_widget' => '<div id="%1$s" class="widget %2$s"><div class="widgetpadding">',
 			'after_widget'  => '<div class="clr"></div></div></div>',
 			'before_title'  => '<h3>',
 			'after_title'   => '</h3>'
 		));
-		// Bottomcontent main widgets
-		register_sidebar(array(
-			'name' => 'Widgets Bottom',
-			'id'   => 'widgets-bottom-sidebar',
-			'description'   => 'This the widgetized area in the bottom sidebar.',
+        register_sidebar(array(
+			'name' => 'Widgets Intro Bottom',
+			'id'   => 'widgets-intro-bottom',
+			'description'   => 'This is page intro bottom widgetized area.',
 			'before_widget' => '<div id="%1$s" class="widget %2$s"><div class="widgetpadding">',
 			'after_widget'  => '<div class="clr"></div></div></div>',
 			'before_title'  => '<h3>',
 			'after_title'   => '</h3>'
 		));
-	}
+    }
 }
 add_action( 'widgets_init', 'basic_setup_widgets_init' );
+
+// check active widgets
+function is_sidebar_active( $sidebar_id ){
+    $the_sidebars = wp_get_sidebars_widgets();
+    if( !isset( $the_sidebars[$sidebar_id] ) )
+        return false;
+    else
+        return count( $the_sidebars[$sidebar_id] );
+}
+// widget empty title content wrapper fix
+function check_sidebar_params( $params ) {
+    global $wp_registered_widgets;
+    $settings_getter = $wp_registered_widgets[ $params[0]['widget_id'] ]['callback'][0];
+    $settings = $settings_getter->get_settings();
+    $settings = $settings[ $params[1]['number'] ];
+    if ( $params[0][ 'after_widget' ] == '<div class="clr"></div></div>' && isset( $settings[ 'title' ] ) &&  empty( $settings[ 'title' ] ) ){
+        $params[0][ 'before_widget' ] .= '<div class="widget-contentbox">';
+    }
+    return $params;
+}
+// Add widget param check for empty html correction
+add_filter( 'dynamic_sidebar_params', 'check_sidebar_params' );
+
+
+/*********************
+* Smoothie functions *
+*********************/
+
+// theme html output menu's by name (str or array, default primary)
+function smoothie_menu_html( $menu, $primary = false ){
+
+    if( $menu != '' || is_array( $menu ) ){
+        $chk = 0;
+        if( is_array( $menu ) ){
+
+            // multi menu
+            foreach( $menu as $nm ){
+                if( has_nav_menu( $nm ) ){
+                    echo '<div id="'.$nm.'menubox"><div id="'.$nm.'menu" class=""><nav><div class="innerpadding">';
+                    wp_nav_menu( array( 'theme_location' => $nm ) );
+                    echo '<div class="clr"></div></div></nav></div></div>';
+                    $chk++;
+                }
+            }
+
+        }else if( has_nav_menu( $menu ) ){
+
+            // single menu
+            echo '<div id="'.$menu.'menubox"><div id="'.$menu.'menu" class=""><nav><div class="innerpadding">';
+            wp_nav_menu( array( 'theme_location' => $menu , 'menu_class' => 'nav-menu' ) );
+            echo '<div class="clr"></div></div></nav></div></div>';
+            $chk++;
+
+        }
+
+        if( $chk == 0 && $primary ){
+
+            // default pages menu
+            if( is_customize_preview() ){
+            echo '<div id="area-default-menu" class="customizer-placeholder">Default menu</div>';
+            }
+            wp_nav_menu( array( 'theme_location' => 'primary', 'menu_class' => 'nav-menu' ) ); // wp_page_menu();
+
+        }
+
+    }
+}
+
+
+// theme html output posts by type or default
+
+function smoothie_loop_html(){
+    if (have_posts()) :
+		while (have_posts()) : the_post();
+            echo '<div class="post-container">';
+
+                // post title section
+                $title_html = '<a href="'.get_the_permalink().'" target="_self" title="'.get_the_title().'">'.get_the_title().'</a>';
+
+                echo '<div class="post-title">';
+                if(is_page()){
+                    echo '<h1>'.$title_html.'</h1>';
+                }else if( is_single() ){
+                    echo '<h1>'.$title_html.'</h1>';
+                }else{
+                    echo '<h2>'.$title_html.'</h2>';
+                }
+                echo '</div>';
+
+                // post content section
+                $excerpt_length = 24; // char count
+                $post = get_post($post->id);
+                $fulltext = $post->post_content;//  str_replace( '<!--more-->', '',);
+                $content = apply_filters('the_content', $fulltext );
+                $excerpt = truncate( $content, $excerpt_length, '', false, true );  // get_the_excerpt()
+
+                if(is_page()){
+                    echo '<div class="post-content">';
+                    echo $content;
+                    echo '</div>';
+                }else if( is_single() ){
+                    echo '<div class="post-content">';
+                    echo $content;
+                    echo '</div>';
+                    previous_post_link('%link', __('previous', 'resource' ), TRUE);
+                    next_post_link('%link', __('next', 'resource' ), TRUE);
+
+                }else{
+                    echo '<div class="post-content post-excerpt">';
+                    echo $excerpt;
+                    echo '</div>';
+                }
+
+            echo '</div>';
+
+        endwhile;
+    endif;
+    wp_reset_query();
+}
+
+
+/* smoothie childpages */
+function smoothie_childpages_html(){
+    if (have_posts()) :
+        while (have_posts()) : the_post();
+
+            if( is_page() ){
+
+                $page_ID = get_the_ID();
+                //$values = get_post_custom( $page_ID );
+                //$post_obj = $wp_query->get_queried_object();
+
+                //$childparentcontent = get_post_meta($page_ID, "meta-box-display-parentcontent", true);
+                $childpagedisplay = get_post_meta($page_ID, "meta-box-display-childpages", true);
+
+                if( isset($childpagedisplay) && $childpagedisplay != 'none'){
+
+                    $args = array(
+                    'post_parent' => $page_ID,
+                    'post_type'   => 'page',
+                    'posts_per_page' => -1,
+                    'post_status' => 'publish',
+                    'order' => 'ASC'
+                    );
+                    $childpages = get_children( $args );
+                    if( $childpages ){
+                        $content = '';
+                        foreach($childpages as $c => $page){
+
+                            //print_r($page);
+                            $contentimagedata = wp_get_attachment_image_src( get_post_thumbnail_id( $page->ID ),'full', false );
+                            $contentimage = $contentimagedata[0];
+                            $pieces = get_extended($page->post_content); //print_r($pieces);
+
+                            $content .= '<div id="'.$page->post_name.'" class="childpage swiper-slide" data-hash="slide-'.$page->post_name.'"><div class="contentholder">';
+                            $content .= '<div class="subtitle"><h3><a href="'.get_permalink($page->ID).'" title="'.$page->post_title.'" target="_self">'.$page->post_title.'</a></h3></div>';
+                            $content .= apply_filters('the_content',  $pieces['main'] );
+                            $content .= '<div class="clr"></div></div></div>';
+                        }
+                        echo $content;
+
+                    }
+                }
+            }
+        endwhile;
+    endif;
+    wp_reset_query();
+} // end childpage content
+
+
+function smoothie_childpages_menuitems(){
+    if (have_posts()) :
+        while (have_posts()) : the_post();
+            if( is_page() ){
+                $page_ID = get_the_ID();
+                //$childparentcontent = get_post_meta($page_ID, "meta-box-display-parentcontent", true);
+                $childpagedisplay = get_post_meta($page_ID, "meta-box-display-childpages", true);
+                if( isset($childpagedisplay) && $childpagedisplay != 'none'){
+                    $args = array(
+                    'post_parent' => $page_ID,
+                    'post_type'   => 'page',
+                    'posts_per_page' => -1,
+                    'post_status' => 'publish',
+                    'order' => 'ASC'
+                    );
+                    $childpages = get_children( $args );
+                    if( $childpages ){
+                        $menu = '';
+                        foreach($childpages as $c => $page){
+                            $contentimagedata = wp_get_attachment_image_src( get_post_thumbnail_id( $page->ID ),'full', false );
+                            $contentimage = $contentimagedata[0];
+                            $pieces = get_extended($page->post_content);
+                            $menu .= '<li id="button-'.$page->post_name.'" data-imgurl="'.$contentimage.'"><a href="#slide-'.$page->post_name.'" title="'.$page->post_title.'" target="_self">'.$page->post_title.'</a></li>';
+                        }
+
+                        $post = get_post( $page_ID );
+                        echo '<div id="pagemenu"><ul>';
+                        echo '<li><a href="#page-home">home</a></li>';
+                        echo '<li><a href="#slide-'.$post->post_name.'">'. $post->post_title .'</a></li>';
+                        echo $menu;
+                        echo '<li><a href="#page-end">more</a></li>';
+                        echo '</ul></div>';
+
+                    }
+                }
+            }
+        endwhile;
+    endif;
+    wp_reset_query();
+} // end childpage content
+
+/*
+function smoothie_page_menu(){
+    echo '<div id="pagemenu"><ul>';
+    // <li><a href="#page-home">home</a></li>
+    echo '<li><a href="#slide-'.$post->post_name.'">'. $post->post_title .'</a></li>';
+    smoothie_childpages_menuitems();
+    // <li><a href="#page-end">more</a></li>
+    echo '</ul></div>';
+}
+*/
+
+// theme html output toplogo (custom_logo) or site title home link
+function smoothie_toplogo_html(){
+
+    if( is_customize_preview() ){
+        echo '<div id="area-custom-image" class="customizer-placeholder">Logo image</div>';
+    }
+
+    if( get_theme_mod('smoothie_theme_identity_logo', '') != '' ){
+        $custom_logo_url = get_theme_mod('smoothie_theme_identity_logo');
+        $custom_logo_attr = array(
+            'class'    => 'custom-logo',
+            'itemprop' => 'logo',
+        );
+        echo sprintf( '<a href="%1$s" class="custom-logo-link image" rel="home" itemprop="url">%2$s</a>',
+        esc_url( home_url( '/' ) ),
+        '<img id="toplogo" src="'.$custom_logo_url.'" border="0" />'
+        );
+    }else if( get_theme_mod('custom_logo', '') != '' ){
+        $custom_logo_id = get_theme_mod('custom_logo');
+        $custom_logo_attr = array(
+            'class'    => 'custom-logo',
+            'itemprop' => 'logo',
+        );
+        echo sprintf( '<a href="%1$s" class="custom-logo-link image" rel="home" itemprop="url">%2$s</a>',
+        esc_url( home_url( '/' ) ),
+        wp_get_attachment_image( $custom_logo_id, 'full', false, $custom_logo_attr )
+        );
+    }else{
+        echo sprintf( '<a href="%1$s" class="custom-logo-link text" rel="home" itemprop="url">%2$s</a>',
+        esc_url( home_url( '/' ) ),
+        esc_attr( get_bloginfo( 'name', 'display' ) ) //get_bloginfo( 'description' )
+        );
+    }
+}
+
+
+// theme html output widget area's by type or default
+function smoothie_theme_widgetarea_html( $id, $type = false ){
+
+
+    if( is_customize_preview() ){
+        echo '<div id="area-'.$id.'" class="customizer-placeholder">Area '.$id.'</div>';
+        if( is_sidebar_active( $id ) < 1 ){
+            dynamic_sidebar( $id ); //
+        }
+    }
+    if( isset($id) && $id != '' ){
+
+        if( function_exists('dynamic_sidebar') && function_exists('is_sidebar_active') && is_sidebar_active( $id ) ){
+            $class = 'widgetbox';
+            if( isset($type) && $type != '' ){
+                $class = 'widgetbox widget-'.$type;
+                echo '<div id="'.$id.'" class="'.$class.'">';
+            }else{
+                echo '<div id="'.$id.'" class="'.$class.' columnbox colset'.is_sidebar_active( $id ).'">';
+            }
+            dynamic_sidebar( $id );
+            echo '<div class="clr"></div></div>';
+        }
+
+    }
+}
+
+
+
+/***********************
+* Remove unneeded code *
+***********************/
 
 
 // register global variables (options/customizer)
@@ -162,245 +462,6 @@ function smoothie_theme_global_js() {
 add_action('wp_enqueue_scripts', 'smoothie_theme_global_js');
 
 
-// register style sheet
-function smoothie_theme_stylesheet(){
-    $stylesheet = get_template_directory_uri().'/style.css';
-    echo '<link rel="stylesheet" id="wp-theme-main-style"  href="'.$stylesheet.'" type="text/css" media="all" />';
-}
-add_action( 'wp_head', 'smoothie_theme_stylesheet', 9999 );
-
-// register style sheet function for editor
-function onepiece_editor_styles() {
-    add_editor_style( 'style.css' );
-}
-add_action( 'admin_init', 'onepiece_editor_styles' );
-
-
-
-// theme html output toplogo (custom_logo) or site title home link
-function smoothie_theme_toplogo_html(){
-
-    if( is_customize_preview() ){
-        echo '<div id="area-custom-image" class="customizer-placeholder">Logo image</div>';
-    }
-
-    if( get_theme_mod('smoothie_theme_identity_logo', '') != '' ){
-        $custom_logo_url = get_theme_mod('smoothie_theme_identity_logo');
-        $custom_logo_attr = array(
-            'class'    => 'custom-logo',
-            'itemprop' => 'logo',
-        );
-        echo sprintf( '<a href="%1$s" class="custom-logo-link image" rel="home" itemprop="url">%2$s</a>',
-        esc_url( home_url( '/' ) ),
-        '<img id="toplogo" src="'.$custom_logo_url.'" border="0" />'
-        );
-    }else if( get_theme_mod('custom_logo', '') != '' ){
-        $custom_logo_id = get_theme_mod('custom_logo');
-        $custom_logo_attr = array(
-            'class'    => 'custom-logo',
-            'itemprop' => 'logo',
-        );
-        echo sprintf( '<a href="%1$s" class="custom-logo-link image" rel="home" itemprop="url">%2$s</a>',
-        esc_url( home_url( '/' ) ),
-        wp_get_attachment_image( $custom_logo_id, 'full', false, $custom_logo_attr )
-        );
-    }else{
-        echo sprintf( '<a href="%1$s" class="custom-logo-link text" rel="home" itemprop="url">%2$s</a>',
-        esc_url( home_url( '/' ) ),
-        esc_attr( get_bloginfo( 'name', 'display' ) ) //get_bloginfo( 'description' )
-        );
-    }
-}
-
-
-// theme html output menu's by name (str or array, default primary)
-function smoothie_theme_menu_html( $menu, $primary = false ){
-
-    if( $menu != '' || is_array( $menu ) ){
-        $chk = 0;
-        if( is_array( $menu ) ){
-
-            // multi menu
-            foreach( $menu as $nm ){
-                if( has_nav_menu( $nm ) ){
-                    echo '<div id="'.$nm.'menubox"><div id="'.$nm.'menu" class=""><nav><div class="innerpadding">';
-                    wp_nav_menu( array( 'theme_location' => $nm ) );
-                    echo '<div class="clr"></div></div></nav></div></div>';
-                    $chk++;
-                }
-            }
-
-        }else if( has_nav_menu( $menu ) ){
-
-            // single menu
-            echo '<div id="'.$menu.'menubox"><div id="'.$menu.'menu" class=""><nav><div class="innerpadding">';
-            wp_nav_menu( array( 'theme_location' => $menu , 'menu_class' => 'nav-menu' ) );
-            echo '<div class="clr"></div></div></nav></div></div>';
-            $chk++;
-
-        }
-
-        if( $chk == 0 && $primary ){
-
-            // default pages menu
-            if( is_customize_preview() ){
-            echo '<div id="area-default-menu" class="customizer-placeholder">Default menu</div>';
-            }
-            wp_nav_menu( array( 'theme_location' => 'primary', 'menu_class' => 'nav-menu' ) ); // wp_page_menu();
-
-        }
-
-    }
-}
-
-// theme html output widget area's by type or default
-function smoothie_theme_widgetarea_html( $id, $type = false ){
-
-
-    if( is_customize_preview() ){
-        echo '<div id="area-'.$id.'" class="customizer-placeholder">Area '.$id.'</div>';
-        if( is_sidebar_active( $id ) < 1 ){
-            dynamic_sidebar( $id ); //
-        }
-    }
-    if( isset($id) && $id != '' ){
-
-        if( function_exists('dynamic_sidebar') && function_exists('is_sidebar_active') && is_sidebar_active( $id ) ){
-            $class = 'widgetbox';
-            if( isset($type) && $type != '' ){
-                $class = 'widgetbox widget-'.$type;
-                echo '<div id="'.$id.'" class="'.$class.'">';
-            }else{
-                echo '<div id="'.$id.'" class="'.$class.' columnbox colset'.is_sidebar_active( $id ).'">';
-            }
-            dynamic_sidebar( $id );
-            echo '<div class="clr"></div></div>';
-        }
-
-    }
-}
-
-// theme html output widget area's by type or default
-function smoothie_theme_loop_html(){
-    if (have_posts()) :
-		while (have_posts()) : the_post();
-
-            echo '<div class="post-container">';
-
-                // post title section
-                $title_html = '<a href="'.get_the_permalink().'" target="_self" title="'.get_the_title().'">'.get_the_title().'</a>';
-
-                echo '<div class="post-title">';
-                if(is_page()){
-                    echo '<h1>'.$title_html.'</h1>';
-                }else if( is_single() ){
-                    echo '<h1>'.$title_html.'</h1>';
-                }else{
-                    echo '<h2>'.$title_html.'</h2>';
-                }
-                echo '</div>';
-
-                // post content section
-                $excerpt_length = 24; // char count
-                $post = get_post($post->id);
-                $fulltext = $post->post_content;//  str_replace( '<!--more-->', '',);
-                $content = apply_filters('the_content', $fulltext );
-                $excerpt = truncate( $content, $excerpt_length, '', false, true );  // get_the_excerpt()
-
-                if(is_page()){
-                    echo '<div class="post-content">';
-                    echo $content;
-                    echo '</div>';
-                }else if( is_single() ){
-                    echo '<div class="post-content">';
-                    echo $content;
-                    echo '</div>';
-                    previous_post_link('%link', __('previous', 'resource' ), TRUE);
-                    next_post_link('%link', __('next', 'resource' ), TRUE);
-
-                }else{
-                    echo '<div class="post-content post-excerpt">';
-                    echo $excerpt;
-                    echo '</div>';
-                }
-
-            echo '</div>';
-
-        endwhile;
-    endif;
-    wp_reset_query();
-}
-
-
-/**
- * Date display in tweet('time ago') format
- */
-function wp_time_ago( $t ) {
-	// https://codex.wordpress.org/Function_Reference/human_time_diff
-	//get_the_time( 'U' )
-	printf( _x( '%s ago', '%s = human-readable time difference', 'onepiece' ), human_time_diff( $t, current_time( 'timestamp' ) ) );
-
-}
-
-// image orient
-function check_image_orientation($pid){
-	$orient = 'square';
-    $image = wp_get_attachment_image_src( get_post_thumbnail_id($pid), '');
-    $image_w = $image[1];
-    $image_h = $image[2];
-			if ($image_w > $image_h) {
-				$orient = 'landscape';
-			}elseif ($image_w == $image_h) {
-				$orient = 'square';
-			}else {
-				$orient = 'portrait';
-			}
-			return $orient;
-}
-
-// get categories
-function get_categories_select(){
-    $get_cats = get_categories();
-    $results;
-    $count = count($get_cats);
-			for ($i=0; $i < $count; $i++) {
-				if (isset($get_cats[$i]))
-					$results[$get_cats[$i]->slug] = $get_cats[$i]->name;
-				else
-					$count++;
-			}
-    return $results;
-}
-
-// Category metabox Hierarchy
-function onepiece_wp_terms_checklist_args( $args, $post_id ) {
-   $args[ 'checked_ontop' ] = false;
-   return $args;
-}
-add_filter( 'wp_terms_checklist_args', 'onepiece_wp_terms_checklist_args', 1, 2 );
-
-// check active widgets
-function is_sidebar_active( $sidebar_id ){
-    $the_sidebars = wp_get_sidebars_widgets();
-    if( !isset( $the_sidebars[$sidebar_id] ) )
-        return false;
-    else
-        return count( $the_sidebars[$sidebar_id] );
-}
-
-// widget empty title content wrapper fix
-function check_sidebar_params( $params ) {
-    global $wp_registered_widgets;
-    $settings_getter = $wp_registered_widgets[ $params[0]['widget_id'] ]['callback'][0];
-    $settings = $settings_getter->get_settings();
-    $settings = $settings[ $params[1]['number'] ];
-    if ( $params[0][ 'after_widget' ] == '<div class="clr"></div></div>' && isset( $settings[ 'title' ] ) &&  empty( $settings[ 'title' ] ) ){
-        $params[0][ 'before_widget' ] .= '<div class="widget-contentbox">';
-    }
-    return $params;
-}
-// Add widget param check for empty html correction
-add_filter( 'dynamic_sidebar_params', 'check_sidebar_params' );
 
 /**
 * Truncates text.
@@ -508,9 +569,6 @@ function truncate($text, $length = 100, $ending = '...', $exact = true, $conside
 
 
 
-/***********************
-* Remove unneeded code *
-***********************/
 /* Remove Emoji junk by Christine Cooper
  * Found on http://wordpress.stackexchange.com/questions/185577/disable-emojicons-introduced-with-wp-4-2
  */
@@ -559,6 +617,5 @@ function bp_remove_signup_gravatar ($image) {
 	}
 }
 add_filter('bp_get_signup_avatar', 'bp_remove_signup_gravatar', 1, 1 );
-
 
 ?>

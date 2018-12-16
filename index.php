@@ -1,7 +1,5 @@
 <?php
-/**
- * Theme main index file
- */
+/** Theme main index file */
 require_once('functions.php');
 
 // the current page/post data
@@ -9,7 +7,19 @@ global $post;
 
 // determine header image
 $header_image = get_header_image();
+$header_height = 100;
+if( !is_front_page() ){
+$header_height = 20;
+}
 
+$default_image = 'https://avatars3.githubusercontent.com/u/36711733?s=400&u=222c42bbcb09f7639b152cabbe1091b640e78ff2&v=4';
+if( ( !empty($header_image) && $header_image != 'remove-header') || has_post_thumbnail( $post->ID ) ){
+    if( has_post_thumbnail( $post->ID ) && !is_front_page() && ( is_page() || is_single() ) ){
+            $thumbnail_src = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), 'medium' );
+            $header_image = esc_attr( $thumbnail_src[0] );
+    }
+    $headerstyle = ' style="background-image:url('. esc_url( $header_image ) .');background-size:cover;background-position:center;min-height:'.$header_height.'%;"';
+}
 ?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?> class="no-js no-svg">
@@ -32,18 +42,8 @@ $header_image = get_header_image();
 		.'<meta property="og:url" content="' . get_permalink() . '"/>'
 		.'<meta property="og:site_name" content="'.esc_attr( get_bloginfo( 'name', 'display' ) ).'"/>'
 		.'<meta property="og:description" content="'.get_bloginfo( 'description' ).'"/>';
-    $default_image = 'https://avatars3.githubusercontent.com/u/36711733?s=400&u=222c42bbcb09f7639b152cabbe1091b640e78ff2&v=4';
-    if( !has_post_thumbnail( $post->ID )) { //the post does not have featured image, use a default image
-        if( !empty($header_image) ){
-            $default_image = get_header_image();
-        }else{
-            $default_image = get_theme_mod( 'smoothie_theme_identity_logo', $default_image );
-        }
-    }else{
-        $thumbnail_src = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), 'medium' );
-        $default_image = esc_attr( $thumbnail_src[0] );
-    }
-    echo '<meta property="og:image" content="' . $default_image . '"/>';
+
+    echo '<meta property="og:image" content="' . $header_image . '"/>';
 
     // include wp head
     wp_head();
@@ -54,73 +54,123 @@ $header_image = get_header_image();
     $bgrepeat = get_theme_mod('background_repeat', 'no-repeat');
     $bgsize = get_theme_mod('background_size', 'cover');
     $bodybgstyle = ' style="background-image:url('.esc_url( get_background_image() ).');background-position:'.$bgposition.';background-attachment:'.$bgattacht.';background-size:'.$bgsize.';background-repeat:'.$bgrepeat.';"';
-    $headerstyle = ' style="background-image:url('.esc_url( $header_image ) .');background-size:cover;background-position:center;"';
+    ?>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.4.2/js/swiper.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.4.2/css/swiper.min.css" />
+    <script>
+
+    jQuery(document).ready(function($) {
+    var swiper_page_vertical = new Swiper('.swiper-container-v', {
+      direction: 'vertical',
+      slidesPerView: 'auto',//slidesPerView: 1,
+      spaceBetween: 0,
+      hashNavigation: {
+        replaceState: true,
+        watchState: true,
+      },
+      mousewheel: true,
+      speed: 600,
+      parallax: true,
+      loop: true,
+      pagination: {
+        el: '.swiper-pagination-v',
+        clickable: false,
+      },
+    });
+
+
+    });
+
+    </script>
+    <?php
+
+
+
 
 echo '</head>';
-echo '<body '.$bodybgstyle.' '; body_class(); echo '>';
+echo '<body '.$bodybgstyle.' '; body_class( 'swiper-container, swiper-container-v' ); echo '>';
 ?>
-    <div id="pagecontainer" class="site">
+
+<div id="pagecontainer" class="swiper-wrapper">
 
 
-        <div id="topcontent"<?php echo $headerstyle; ?>>
 
-            <div class="outerspace">
-            <?php
-            smoothie_theme_toplogo_html();
-            smoothie_theme_menu_html( 'top' , true  );
-            smoothie_theme_widgetarea_html( 'widgets-top-sidebar' );
-            ?>
+    <div id="headercontainer" class="swiper-slide" data-hash="page-home"<?php echo $headerstyle; ?>>
+        <div class="contentholder">
+            <div id="headerintrobox">
+                <?php smoothie_theme_widgetarea_html( 'widgets-intro', $type = false ); ?>
             </div>
-        </div>
-        <div id="maincontent">
-            <div class="outerspace">
-
-                <?php
-                if( is_customize_preview() ){
-                    echo '<div id="area-main-menu" class="customizer-placeholder">Main menu</div>';
-                }
-                smoothie_theme_menu_html( array( 'main' ) );
-                ?>
-
-                <div id="maincontentbar">
-                    <?php
-                    if( is_customize_preview() ){
-                        echo '<div id="area-page-main-content" class="customizer-placeholder">Page main content</div>';
-                    }
-                    smoothie_theme_loop_html();
-                    ?>
-                </div>
-                <div id="mainsidebar">
-                    <?php
-                    if( is_customize_preview() ){
-                        echo '<div id="area-side-menu" class="customizer-placeholder">Side menu</div>';
-                    }
-                    smoothie_theme_menu_html( 'side' );
-
-                    smoothie_theme_widgetarea_html( 'sidebar' );
-
-                    ?>
-                </div>
-                <div class="clr"></div>
-
+            <div id="headersubbox">
+                <?php smoothie_theme_widgetarea_html( 'widgets-intro-sub', $type = false ); ?>
             </div>
-        </div>
-        <div id="bottomcontent">
-            <div class="outerspace">
-            <?php
-            if( is_customize_preview() ){
-                echo '<div id="area-bottom-menu" class="customizer-placeholder">Bottom menu</div>';
-            }
-            smoothie_theme_menu_html( 'bottom' );
-
-            smoothie_theme_widgetarea_html( 'widgets-bottom-sidebar' );
-            ?>
+            <div id="headerbottombox">
+                <?php smoothie_theme_widgetarea_html( 'widgets-intro-bottom', $type = false ); ?>
             </div>
         </div>
     </div>
+
+    <div id="maincontainer" class="swiper-slide" data-hash="slide-<?php echo $post->post_name; ?>">
+        <div class="contentholder">
+            <div id="beforecontent">
+            </div>
+            <?php
+                smoothie_loop_html();
+            ?>
+            <div id="aftercontent">
+            </div>
+        </div>
+    </div>
+
+    <?php
+        smoothie_childpages_html();
+    ?>
+
+    <div id="footercontainer" class="swiper-slide" data-hash="page-end">
+        <div class="contentholder">
+            Footer
+        </div>
+    </div>
+
+</div>
+
+<div id="topnavigation">
+    <!--
+    <div id="upperbar">
+                <?php
+                smoothie_menu_html( 'top', false );
+                ?>
+            </div>
+             -->
+            <div id="topbar">
+                <?php
+                smoothie_toplogo_html();
+                  smoothie_childpages_menuitems();
+                //smoothie_page_menu();
+                ?>
+
+            </div>
+
+</div>
+
+<div id="sidebar">
+    <?php
+        smoothie_menu_html( 'side', true );
+    ?>
+</div>
+<div class="swiper-pagination swiper-pagination-v"></div>
+
+
 <?php
-    wp_footer();
-    echo '</body></html>';
+/**/
+wp_footer();
 ?>
 
+<script>
 
+jQuery(document).ready(function($) {
+$('.contentholder').css({ 'padding-top': $('#topnavigation').height() +1 });
+});
+</script>
+    <?php
+echo '</body></html>';
+?>

@@ -3,7 +3,9 @@
  * Theme main customizer functions
  */
 
-function smoothie_theme_register_theme_customizer( $wp_customize ) {
+function smoothie_register_theme_customizer( $wp_customize ) {
+
+    /* logo image */
 
 	$wp_customize->remove_control('display_header_text');
 	//$wp_customize->remove_section('title_tagline'); // remove default title / site-identity
@@ -16,21 +18,23 @@ function smoothie_theme_register_theme_customizer( $wp_customize ) {
     ));
 
     $wp_customize->add_control( new WP_Customize_Image_Control( $wp_customize, 'smoothie_theme_identity_logo', array(
-        'label'    => __( 'Site Logo Image', 'smoothie' ),
+        'label'    => __( 'Site Logo Image', 'resource' ),
         'section'  => 'title_tagline',
         'settings' => 'smoothie_theme_identity_logo',
-        'description' => __( 'Upload or select a medium sized image to use as site logo (replacing the site-title text on top).', 'smoothie' ),
+        'description' => __( 'Upload or select a medium sized image to use as site logo (replacing the site-title text on top).', 'resource' ),
         'priority' => 10,
     )));
 
-
 }
-add_action( 'customize_register', 'smoothie_theme_register_theme_customizer' );
+add_action( 'customize_register', 'smoothie_register_theme_customizer' );
+
+
 
 // default sanitize functions
 function smoothie_theme_sanitize_default($obj){
     	return $obj; //.. global sanitizer
 }
+
 function smoothie_theme_sanitize_array( $values ) {
     $multi_values = !is_array( $values ) ? explode( ',', $values ) : $values;
     return !empty( $multi_values ) ? array_map( 'sanitize_text_field', $multi_values ) : array();
