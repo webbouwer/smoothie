@@ -76,6 +76,13 @@ if( ( !empty($header_image) && $header_image != 'remove-header') || has_post_thu
         el: '.swiper-pagination-v',
         clickable: false,
       },
+      onSlideChangeStart: function(s) {
+        var currentSlide = $(s.slides[s.activeIndex]);
+    },
+    onSlideChangeEnd: function(s) {
+        var currentSlide = $(s.slides[s.activeIndex]);
+        alert('check '+ s.activeIndex);
+    }
     });
 
 
@@ -166,10 +173,11 @@ wp_footer();
 ?>
 
 <script>
-
+/*
 jQuery(document).ready(function($) {
 $('.contentholder').css({ 'padding-top': $('#topnavigation').height() +1 });
 });
+*/
 </script>
     <?php
 echo '</body></html>';

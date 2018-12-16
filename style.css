@@ -35,7 +35,7 @@ body
 {
 min-height:100%;
 font-family: "Helvetica", arial, serif;
-font-size:15px;
+font-size:1em;
 color: black;
 background-color: white;
 }
@@ -44,6 +44,21 @@ background-color: white;
 {
 clear: both;
 height: 0;
+}
+
+.post-title > h1,
+.post-title > h2,
+.post-title > h3,
+.childpage .subtitle > h1,
+.childpage .subtitle > h2,
+.childpage .subtitle > h3,
+.post-content > p,
+.contentholder > p,
+.post-content > ul,
+.contentholder > ul
+{
+    max-width:780px;
+    margin:15px auto;
 }
 
 
@@ -81,7 +96,6 @@ top:0px;
 width:100%;
 z-index: 999;
 }
-
 #maincontainer.swiper-slide,
 .childpage.swiper-slide
 {
@@ -91,6 +105,10 @@ overflow:visible;
 }
 
 
+.contentholder
+{
+padding:20% 25px 25px;
+}
 
 /* top */
 .custom-logo-link img
