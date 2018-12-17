@@ -240,7 +240,7 @@ function smoothie_childpages_html(){
                             $contentimage = $contentimagedata[0];
                             $pieces = get_extended($page->post_content); //print_r($pieces);
 
-                            $content .= '<div id="'.$page->post_name.'" class="childpage swiper-slide" data-hash="slide-'.$page->post_name.'"><div class="contentholder">';
+                            $content .= '<div id="'.$page->post_name.'" class="childpage swiper-slide" data-hash="slide-'.$page->post_name.'"><div class="contentholder" data-swiper-parallax="-800">';
                             $content .= '<div class="subtitle"><h3><a href="'.get_permalink($page->ID).'" title="'.$page->post_title.'" target="_self">'.$page->post_title.'</a></h3></div>';
                             $content .= apply_filters('the_content',  $pieces['main'] );
                             $content .= '<div class="clr"></div></div></div>';

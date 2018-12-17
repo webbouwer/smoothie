@@ -9,7 +9,7 @@ global $post;
 $header_image = get_header_image();
 $header_height = 100;
 if( !is_front_page() ){
-$header_height = 20;
+$header_height = 40;
 }
 
 $default_image = 'https://avatars3.githubusercontent.com/u/36711733?s=400&u=222c42bbcb09f7639b152cabbe1091b640e78ff2&v=4';
@@ -55,38 +55,11 @@ if( ( !empty($header_image) && $header_image != 'remove-header') || has_post_thu
     $bgsize = get_theme_mod('background_size', 'cover');
     $bodybgstyle = ' style="background-image:url('.esc_url( get_background_image() ).');background-position:'.$bgposition.';background-attachment:'.$bgattacht.';background-size:'.$bgsize.';background-repeat:'.$bgrepeat.';"';
     ?>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.4.2/js/swiper.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.4.2/css/swiper.min.css" />
+    <!-- https://cdnjs.com/libraries/Swiper -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.4.5/js/swiper.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.4.5/css/swiper.min.css" />
     <script>
 
-    jQuery(document).ready(function($) {
-    var swiper_page_vertical = new Swiper('.swiper-container-v', {
-      direction: 'vertical',
-      slidesPerView: 'auto',//slidesPerView: 1,
-      spaceBetween: 0,
-      hashNavigation: {
-        replaceState: true,
-        watchState: true,
-      },
-      mousewheel: true,
-      speed: 600,
-      parallax: true,
-      loop: true,
-      pagination: {
-        el: '.swiper-pagination-v',
-        clickable: false,
-      },
-      onSlideChangeStart: function(s) {
-        var currentSlide = $(s.slides[s.activeIndex]);
-    },
-    onSlideChangeEnd: function(s) {
-        var currentSlide = $(s.slides[s.activeIndex]);
-        alert('check '+ s.activeIndex);
-    }
-    });
-
-
-    });
 
     </script>
     <?php
@@ -103,7 +76,7 @@ echo '<body '.$bodybgstyle.' '; body_class( 'swiper-container, swiper-container-
 
 
     <div id="headercontainer" class="swiper-slide" data-hash="page-home"<?php echo $headerstyle; ?>>
-        <div class="contentholder">
+        <div class="contentholder" data-swiper-parallax="-800">
             <div id="headerintrobox">
                 <?php smoothie_theme_widgetarea_html( 'widgets-intro', $type = false ); ?>
             </div>
@@ -117,7 +90,7 @@ echo '<body '.$bodybgstyle.' '; body_class( 'swiper-container, swiper-container-
     </div>
 
     <div id="maincontainer" class="swiper-slide" data-hash="slide-<?php echo $post->post_name; ?>">
-        <div class="contentholder">
+        <div class="contentholder" data-swiper-parallax="-20">
             <div id="beforecontent">
             </div>
             <?php
@@ -133,7 +106,7 @@ echo '<body '.$bodybgstyle.' '; body_class( 'swiper-container, swiper-container-
     ?>
 
     <div id="footercontainer" class="swiper-slide" data-hash="page-end">
-        <div class="contentholder">
+        <div class="contentholder" data-swiper-parallax="-800">
             Footer
         </div>
     </div>
@@ -141,13 +114,13 @@ echo '<body '.$bodybgstyle.' '; body_class( 'swiper-container, swiper-container-
 </div>
 
 <div id="topnavigation">
-    <!--
+
     <div id="upperbar">
                 <?php
                 smoothie_menu_html( 'top', false );
                 ?>
             </div>
-             -->
+
             <div id="topbar">
                 <?php
                 smoothie_toplogo_html();
@@ -156,7 +129,7 @@ echo '<body '.$bodybgstyle.' '; body_class( 'swiper-container, swiper-container-
                 ?>
 
             </div>
-
+    <div class="clr"></div>
 </div>
 
 <div id="sidebar">
@@ -173,11 +146,65 @@ wp_footer();
 ?>
 
 <script>
-/*
-jQuery(document).ready(function($) {
-$('.contentholder').css({ 'padding-top': $('#topnavigation').height() +1 });
+
+jQuery(function($) {
+
+    $(document).ready(function($) {
+
+    var sliderIndex = 0;
+    var swiper_page_vertical = new Swiper('.swiper-container-v', {
+      direction: 'vertical',
+      slidesPerView: 'auto',//slidesPerView: 1,
+      spaceBetween: 0,
+      hashNavigation: {
+        replaceState: true,
+        watchState: true,
+      },
+      mousewheel: true,
+      speed: 600,
+      parallax: true,
+      loop: true,
+      pagination: {
+        el: '.swiper-pagination-v',
+        clickable: true,
+      },
+      on: {
+        init: function () {
+        },
+      }
+    });
+    /* before and after swipe/scroll vertical */
+    swiper_page_vertical.on('slideChangeTransitionStart', function () {
+        var sindex = $('.swiper-slide-active').data("swiper-slide-index");
+        var mindex = sindex + 1;
+        //console.log('Moving to slide '+sindex);
+        $('#pagemenu ul li').removeClass('active');
+        $('#pagemenu ul li:nth-child('+mindex+')').addClass('active');
+
+        $('.contentholder').css({ 'padding-top': '25px' });
+        $('.swiper-slide-active .contentholder').css({ 'padding-top': $('#topnavigation').height() +1 });
+    });
+
+    swiper_page_vertical.on('slideChangeTransitionEnd', function () {
+        var sindex = $('.swiper-slide-active').data("swiper-slide-index");
+        console.log('Moved to slide '+sindex);
+    });
+
+
+    console.log('Starting at slide '+ swiper_page_vertical.activeIndex);
+
+    });
+
+
+
+
+    $('.contentholder').css({ 'padding-top': '25px' });
+    $('swiper-slide-duplicate-active .contentholder,.swiper-slide-active .contentholder').css({ 'padding-top': $('#topnavigation').height() });
+
+
+
 });
-*/
+
 </script>
     <?php
 echo '</body></html>';

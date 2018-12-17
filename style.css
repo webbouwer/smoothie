@@ -100,24 +100,52 @@ z-index: 999;
 .childpage.swiper-slide
 {
 min-height:100%;
-background-color: aqua;
 overflow:visible;
 }
 
 
 .contentholder
 {
-padding:20% 25px 25px;
+padding:25px 0px;
+transition:all 500ms ease-in-out;
 }
 
+
 /* top */
+.custom-logo-link
+{
+display: block;
+}
 .custom-logo-link img
 {
-max-width:120px;
+max-width:100px;
+}
+#upperbar ul li
+{
+display: inline-block;
 }
 
 /* sidebar */
 #sidebar
 {
 display:none;
+}
+#topbar .custom-logo-link
+{
+display:inline-block;
+float:left;
+}
+#pagemenu
+{
+display: flex;
+align-items: center;
+justify-content: center;
+}
+#pagemenu ul li
+{
+display: inline-block;
+}
+#pagemenu ul li.active a
+{
+color:red;
 }
