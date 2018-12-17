@@ -264,6 +264,8 @@ function smoothie_childpages_menuitems(){
                 //$childparentcontent = get_post_meta($page_ID, "meta-box-display-parentcontent", true);
                 $childpagedisplay = get_post_meta($page_ID, "meta-box-display-childpages", true);
                 if( isset($childpagedisplay) && $childpagedisplay != 'none'){
+
+                    $post = get_post( $page_ID );
                     $args = array(
                     'post_parent' => $page_ID,
                     'post_type'   => 'page',
@@ -272,24 +274,31 @@ function smoothie_childpages_menuitems(){
                     'order' => 'ASC'
                     );
                     $childpages = get_children( $args );
-                    if( $childpages ){
-                        $menu = '';
+
+
+                        $menu = '[ "Home", "'.$post->post_title.'"';
+                       if( $childpages ){
                         foreach($childpages as $c => $page){
-                            $contentimagedata = wp_get_attachment_image_src( get_post_thumbnail_id( $page->ID ),'full', false );
+                            /*$contentimagedata = wp_get_attachment_image_src( get_post_thumbnail_id( $page->ID ),'full', false );
                             $contentimage = $contentimagedata[0];
                             $pieces = get_extended($page->post_content);
-                            $menu .= '<li id="button-'.$page->post_name.'" data-imgurl="'.$contentimage.'"><a href="#slide-'.$page->post_name.'" title="'.$page->post_title.'" target="_self">'.$page->post_title.'</a></li>';
+                            $menu .= '<li id="button-'.$page->post_name.'" data-imgurl="'.$contentimage.'"><a href="#slide-'.$page->post_name.'" title="'.$page->post_title.'" target="_self">'.$page->post_title.'</a></li>';*/
+                            $menu .= ', "'.$page->post_title.'"';
                         }
+                       }
+                        $menu .= ', "More"]';
+                        return $menu;
 
-                        $post = get_post( $page_ID );
+                         /*
                         echo '<div id="pagemenu"><ul>';
                         echo '<li><a href="#page-home">home</a></li>';
                         echo '<li><a href="#slide-'.$post->post_name.'">'. $post->post_title .'</a></li>';
                         echo $menu;
                         echo '<li><a href="#page-end">more</a></li>';
-                        echo '</ul></div>';
+                        echo '</ul></div>';*/
 
-                    }
+
+
                 }
             }
         endwhile;

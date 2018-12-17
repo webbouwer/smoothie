@@ -57,7 +57,7 @@ if( ( !empty($header_image) && $header_image != 'remove-header') || has_post_thu
     ?>
     <!-- https://cdnjs.com/libraries/Swiper -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.4.5/js/swiper.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.4.5/css/swiper.min.css" />
+    <!-- <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/Swiper/4.4.5/css/swiper.min.css" /> -->
     <script>
 
 
@@ -117,17 +117,16 @@ echo '<body '.$bodybgstyle.' '; body_class( 'swiper-container, swiper-container-
 
     <div id="upperbar">
                 <?php
-                smoothie_menu_html( 'top', false );
+                  smoothie_menu_html( 'top', false );
                 ?>
             </div>
 
             <div id="topbar">
                 <?php
-                smoothie_toplogo_html();
-                  smoothie_childpages_menuitems();
-                //smoothie_page_menu();
+                  smoothie_toplogo_html();
+                  //smoothie_childpages_menuitems();
                 ?>
-
+                <div class="swiper-menu swiper-menu-v"></div>
             </div>
     <div class="clr"></div>
 </div>
@@ -151,6 +150,8 @@ jQuery(function($) {
 
     $(document).ready(function($) {
 
+    var menu = <?php echo smoothie_childpages_menuitems(); ?>; //['Slide 1', 'Slide 2', 'Slide 3'];
+
     var sliderIndex = 0;
     var swiper_page_vertical = new Swiper('.swiper-container-v', {
       direction: 'vertical',
@@ -165,21 +166,30 @@ jQuery(function($) {
       parallax: true,
       loop: true,
       pagination: {
-        el: '.swiper-pagination-v',
+        el: '.swiper-menu',
         clickable: true,
+        renderBullet: function (index, className) {
+          return '<span class="' + className + '">' + (menu[index]) + '</span>';
+        },
       },
       on: {
         init: function () {
+            setTimeout(function(){
+                $('.contentholder').css({ 'padding-top': '25px' });
+                $('.swiper-slide-active .contentholder').css({ 'padding-top': $('#topnavigation').height() +1 });
+            },300);
         },
       }
     });
+
+
     /* before and after swipe/scroll vertical */
     swiper_page_vertical.on('slideChangeTransitionStart', function () {
         var sindex = $('.swiper-slide-active').data("swiper-slide-index");
         var mindex = sindex + 1;
         //console.log('Moving to slide '+sindex);
-        $('#pagemenu ul li').removeClass('active');
-        $('#pagemenu ul li:nth-child('+mindex+')').addClass('active');
+        //$('#pagemenu ul li').removeClass('active');
+        //$('#pagemenu ul li:nth-child('+mindex+')').addClass('active');
 
         $('.contentholder').css({ 'padding-top': '25px' });
         $('.swiper-slide-active .contentholder').css({ 'padding-top': $('#topnavigation').height() +1 });
@@ -189,19 +199,12 @@ jQuery(function($) {
         var sindex = $('.swiper-slide-active').data("swiper-slide-index");
         console.log('Moved to slide '+sindex);
     });
-
-
     console.log('Starting at slide '+ swiper_page_vertical.activeIndex);
 
     });
 
-
-
-
     $('.contentholder').css({ 'padding-top': '25px' });
     $('swiper-slide-duplicate-active .contentholder,.swiper-slide-active .contentholder').css({ 'padding-top': $('#topnavigation').height() });
-
-
 
 });
 
