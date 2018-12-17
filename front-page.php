@@ -2,33 +2,6 @@
 /** Theme main index file */
 require_once('functions.php');
 
-// the current page/post data
-global $post;
-
-// page id (or reference id)
-$pid = $post->ID;
-if( is_home() ){
-    $pid = get_option( 'page_for_posts' );
-}
-$page_title = get_the_title( $pid );
-
-// determine header image
-$header_image = get_header_image();
-$header_height = 100;
-if( !is_front_page() ){
-$header_height = 40;
-}
-
-$default_image = 'https://avatars3.githubusercontent.com/u/36711733?s=400&u=222c42bbcb09f7639b152cabbe1091b640e78ff2&v=4';
-if( ( !empty($header_image) && $header_image != 'remove-header') || has_post_thumbnail( $post->ID ) ){
-    if( has_post_thumbnail( $post->ID ) && !is_front_page() && ( is_page() || is_single() ) ){
-            $thumbnail_src = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), 'medium' );
-            $header_image = esc_attr( $thumbnail_src[0] );
-    }
-    $headerstyle = ' style="background-image:url('. esc_url( $header_image ) .');background-size:cover;background-position:center;min-height:'.$header_height.'%;"';
-}
-
-
 
 ?>
   <!DOCTYPE html>
@@ -77,19 +50,10 @@ if( ( !empty($header_image) && $header_image != 'remove-header') || has_post_thu
 echo '</head>';
 echo '<body '.$bodybgstyle.' '; body_class(); echo '>';
 ?>
-       <?php get_template_part('navigation'); ?>
 
-      <div id="headercontainer"<?php echo $headerstyle; ?>>
-                <div class="contentholder" data-swiper-parallax="-800">
-                  <div id="headertitlebox">
-                   <h1><?php  echo $page_title; ?></h1>
-                  </div>
-                </div>
-          </div>
+      <?php get_template_part('navigation'); ?>
+  Test
 
-
-
-      <?php smoothie_loop_html(); ?>
 
 <?php
 /**/

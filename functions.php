@@ -4,6 +4,34 @@
 require_once( get_template_directory() . '/page_meta_fields.php'); // customizer functions
 require_once( get_template_directory() . '/customizer.php'); // customizer functions
 
+// the current page/post data
+global $post;
+
+// page id (or reference id)
+$pid = $post->ID;
+if( is_home() ){
+    $pid = get_option( 'page_for_posts' );
+}
+$page_title = get_the_title( $pid );
+
+// determine header image
+$header_image = get_header_image();
+$header_height = 100;
+if( !is_front_page() ){
+$header_height = 40;
+}
+
+$default_image = 'https://avatars3.githubusercontent.com/u/36711733?s=400&u=222c42bbcb09f7639b152cabbe1091b640e78ff2&v=4';
+if( ( !empty($header_image) && $header_image != 'remove-header') || has_post_thumbnail( $post->ID ) ){
+    if( has_post_thumbnail( $post->ID ) && !is_front_page() && ( is_page() || is_single() ) ){
+            $thumbnail_src = wp_get_attachment_image_src( get_post_thumbnail_id( $post->ID ), 'medium' );
+            $header_image = esc_attr( $thumbnail_src[0] );
+    }
+    $headerstyle = ' style="background-image:url('. esc_url( $header_image ) .');background-size:cover;background-position:center;min-height:'.$header_height.'%;"';
+}
+
+
+
 
 
 // register options
@@ -259,8 +287,17 @@ function smoothie_childpages_html(){
 function smoothie_childpages_menuitems(){
     if (have_posts()) :
         while (have_posts()) : the_post();
-            if( is_page() ){
+
                 $page_ID = get_the_ID();
+                if( is_home() ){
+                $page_ID = get_option( 'page_for_posts' );
+                }
+
+                if( is_front_page() ){
+                    $menu = '[ "Home", "'.get_the_title( $page_ID ).'"';
+                }else{
+                    $menu = '[ "'.get_the_title( $page_ID ).'"';
+                }
                 //$childparentcontent = get_post_meta($page_ID, "meta-box-display-parentcontent", true);
                 $childpagedisplay = get_post_meta($page_ID, "meta-box-display-childpages", true);
                 if( isset($childpagedisplay) && $childpagedisplay != 'none'){
@@ -276,31 +313,17 @@ function smoothie_childpages_menuitems(){
                     $childpages = get_children( $args );
 
 
-                        $menu = '[ "Home", "'.$post->post_title.'"';
                        if( $childpages ){
                         foreach($childpages as $c => $page){
-                            /*$contentimagedata = wp_get_attachment_image_src( get_post_thumbnail_id( $page->ID ),'full', false );
-                            $contentimage = $contentimagedata[0];
-                            $pieces = get_extended($page->post_content);
-                            $menu .= '<li id="button-'.$page->post_name.'" data-imgurl="'.$contentimage.'"><a href="#slide-'.$page->post_name.'" title="'.$page->post_title.'" target="_self">'.$page->post_title.'</a></li>';*/
                             $menu .= ', "'.$page->post_title.'"';
                         }
                        }
+
+                }
+
                         $menu .= ', "More"]';
                         return $menu;
 
-                         /*
-                        echo '<div id="pagemenu"><ul>';
-                        echo '<li><a href="#page-home">home</a></li>';
-                        echo '<li><a href="#slide-'.$post->post_name.'">'. $post->post_title .'</a></li>';
-                        echo $menu;
-                        echo '<li><a href="#page-end">more</a></li>';
-                        echo '</ul></div>';*/
-
-
-
-                }
-            }
         endwhile;
     endif;
     wp_reset_query();

@@ -4,7 +4,6 @@ require_once('functions.php');
 
 // the current page/post data
 global $post;
-
 // page id (or reference id)
 $pid = $post->ID;
 if( is_home() ){
@@ -27,9 +26,6 @@ if( ( !empty($header_image) && $header_image != 'remove-header') || has_post_thu
     }
     $headerstyle = ' style="background-image:url('. esc_url( $header_image ) .');background-size:cover;background-position:center;min-height:'.$header_height.'%;"';
 }
-
-
-
 ?>
   <!DOCTYPE html>
   <html <?php language_attributes(); ?> class="no-js no-svg">
@@ -73,13 +69,44 @@ if( ( !empty($header_image) && $header_image != 'remove-header') || has_post_thu
 
 
       </script>
-<?php
+      <?php
+
 echo '</head>';
 echo '<body '.$bodybgstyle.' '; body_class(); echo '>';
 ?>
-       <?php get_template_part('navigation'); ?>
+  <?php get_template_part('navigation'); ?>
 
-      <div id="headercontainer"<?php echo $headerstyle; ?>>
+      <!-- content -->
+      <div id="bodycontainer" class="swiper-container swiper-container-v">
+          <div id="pagecontainer" class="swiper-wrapper">
+
+        <?php if( is_front_page() ){ ?>
+          <!-- header content -->
+          <div id="headercontainer" class="swiper-slide" data-hash="page-home" <?php echo $headerstyle; ?>>
+
+            <div class="contentholder" data-swiper-parallax="-800">
+
+            <div id="headerintrobox">
+                <?php smoothie_theme_widgetarea_html( 'widgets-intro', $type = false ); ?>
+              </div>
+              <div id="headersubbox">
+                <?php smoothie_theme_widgetarea_html( 'widgets-intro-sub', $type = false ); ?>
+              </div>
+              <div id="headerbottombox">
+                <?php smoothie_theme_widgetarea_html( 'widgets-intro-bottom', $type = false ); ?>
+              </div>
+
+            </div>
+          </div>
+          <?php } ?>
+
+
+
+          <!-- page/post content -->
+          <div id="maincontainer" class="swiper-slide" data-hash="slide-<?php echo $post->post_name; ?>">
+
+              <?php if( !is_front_page() ){ ?>
+          <div id="headercontainer"<?php echo $headerstyle; ?>>
                 <div class="contentholder" data-swiper-parallax="-800">
                   <div id="headertitlebox">
                    <h1><?php  echo $page_title; ?></h1>
@@ -87,10 +114,62 @@ echo '<body '.$bodybgstyle.' '; body_class(); echo '>';
                 </div>
           </div>
 
+          <?php } ?>
+
+            <div class="contentholder" data-swiper-parallax="-10">
+              <div id="beforecontent">
+              </div>
+                <?php smoothie_loop_html(); ?>
+                <div id="aftercontent">
+                </div>
+            </div>
+          </div>
+
+        <!-- child content -->
+        <?php smoothie_childpages_html(); ?>
+
+        <!-- footer content -->
+        <div id="footercontainer" class="swiper-slide" data-hash="page-end">
+            <div class="contentholder" data-swiper-parallax="-800">
+                Footer
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+jQuery(document).ready(function(){
 
 
-      <?php smoothie_loop_html(); ?>
+        var menu = <?php echo smoothie_childpages_menuitems(); ?>;
 
+        var swiperV = new Swiper('.swiper-container-v', {
+          direction: 'vertical',
+          slidesPerView: 1, // slidesPerView: 'auto', //
+          spaceBetween: 0,
+          hashNavigation: {
+            replaceState: true,
+            watchState: true,
+          },
+          mousewheel: true,
+          speed: 600,
+          parallax: true,
+          loop: true,
+          pagination: {
+              el: '.swipe-menu',
+                    clickable: true,
+                renderBullet: function (index, className) {
+                  return '<span class="' + className + '">' + (menu[index]) + '</span>';
+                },
+            },
+            /*pagination: {
+            el: '.swiper-pagination-v',
+            clickable: true,
+          },*/
+        });
+
+	});
+</script>
 <?php
 /**/
 wp_footer();
