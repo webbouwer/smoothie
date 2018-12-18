@@ -23,9 +23,27 @@ function smoothie_body_bgstyle(){
 
 // theme html loop output
 function smoothie_body_loop(){
+
+    global $post;
+
     if (have_posts()) :
+
+    echo '<div id="maincontent" class="mainpage-container swiper-slide" data-hash="slide-'.$post->post_name.'">';
+
 		while (have_posts()) : the_post();
+
+                $post = get_post($post->id);
+            /*
+            if( get_post_type() ) : {
+                get_template_part( 'html/body', get_post_type() );
+                elseif :
+                get_template_part( 'html/body', get_post_format() );
+                endif;
+            }
+            */
+
             echo '<div class="post-container">';
+
                 // post title section
                 $title_html = '<a href="'.get_the_permalink().'" target="_self" title="'.get_the_title().'">'.get_the_title().'</a>';
                 echo '<div class="post-title">';
@@ -39,7 +57,6 @@ function smoothie_body_loop(){
                 echo '</div>';
                 // post content section
                 $excerpt_length = 120; // char count
-                $post = get_post($post->id);
                 $fulltext = $post->post_content;//  str_replace( '<!--more-->', '',);
                 $content = apply_filters('the_content', $fulltext );
                 $excerpt = truncate( $content, $excerpt_length, '', false, true );  // get_the_excerpt()
@@ -58,39 +75,10 @@ function smoothie_body_loop(){
                     echo $excerpt;
                     echo '</div>';
                 }
-            echo '</div>';
+            echo '<div class="clr"></div></div>';
         endwhile;
+        echo '<div class="clr"></div></div>';
     endif;
     wp_reset_query();
 }
 
-// theme html output menu's by name (str or array, default primary)
-function smoothie_menu_html( $menu, $primary = false ){
-    if( $menu != '' || is_array( $menu ) ){
-        $chk = 0;
-        if( is_array( $menu ) ){
-            // multi menu
-            foreach( $menu as $nm ){
-                if( has_nav_menu( $nm ) ){
-                    echo '<div id="'.$nm.'menubox"><div id="'.$nm.'menu" class=""><nav><div class="innerpadding">';
-                    wp_nav_menu( array( 'theme_location' => $nm ) );
-                    echo '<div class="clr"></div></div></nav></div></div>';
-                    $chk++;
-                }
-            }
-        }else if( has_nav_menu( $menu ) ){
-            // single menu
-            echo '<div id="'.$menu.'menubox"><div id="'.$menu.'menu" class=""><nav><div class="innerpadding">';
-            wp_nav_menu( array( 'theme_location' => $menu , 'menu_class' => 'nav-menu' ) );
-            echo '<div class="clr"></div></div></nav></div></div>';
-            $chk++;
-        }
-        if( $chk == 0 && $primary ){
-            // default pages menu
-            if( is_customize_preview() ){
-            echo '<div id="area-default-menu" class="customizer-placeholder">Default menu</div>';
-            }
-            wp_nav_menu( array( 'theme_location' => 'primary', 'menu_class' => 'nav-menu' ) ); // wp_page_menu();
-        }
-    }
-}
