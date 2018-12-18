@@ -21,6 +21,9 @@ function smoothie_body_bgstyle(){
     return $bodybgstyle;
 }
 
+
+
+
 // theme html loop output
 function smoothie_body_loop(){
 

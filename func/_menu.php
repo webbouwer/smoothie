@@ -7,17 +7,17 @@ function smoothie_menu_html( $menu, $primary = false ){
             // multi menu
             foreach( $menu as $nm ){
                 if( has_nav_menu( $nm ) ){
-                    echo '<div id="'.$nm.'menubox"><div id="'.$nm.'menu" class=""><nav><div class="innerpadding">';
-                    wp_nav_menu( array( 'theme_location' => $nm ) );
-                    echo '<div class="clr"></div></div></nav></div></div>';
+                    echo '<div id="'.$nm.'menubox"><nav><div class="innerpadding">';
+                    wp_nav_menu( array( 'theme_location' => $nm, 'menu_class' => 'nav-menu') );
+                    echo '<div class="clr"></div></div></nav></div>';
                     $chk++;
                 }
             }
         }else if( has_nav_menu( $menu ) ){
             // single menu
-            echo '<div id="'.$menu.'menubox"><div id="'.$menu.'menu" class=""><nav><div class="innerpadding">';
+            echo '<div id="'.$menu.'menubox"><nav><div class="innerpadding">';
             wp_nav_menu( array( 'theme_location' => $menu , 'menu_class' => 'nav-menu' ) );
-            echo '<div class="clr"></div></div></nav></div></div>';
+            echo '<div class="clr"></div></div></nav></div>';
             $chk++;
         }
         if( $chk == 0 && $primary ){
@@ -25,7 +25,9 @@ function smoothie_menu_html( $menu, $primary = false ){
             if( is_customize_preview() ){
             echo '<div id="area-default-menu" class="customizer-placeholder">Default menu</div>';
             }
+            echo '<div id="'.$menu.'menubox" class="default-menu"><nav><div class="innerpadding">';
             wp_nav_menu( array( 'theme_location' => 'primary', 'menu_class' => 'nav-menu' ) ); // wp_page_menu();
+            echo '<div class="clr"></div></div></nav></div>';
         }
     }
 }

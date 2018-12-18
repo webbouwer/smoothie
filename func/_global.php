@@ -13,39 +13,39 @@ add_action( 'init', 'smoothie_global_active_pid' );
 
 function smoothie_page_type(){
     global $wp_query;
-    $loop = 'notfound';
+    $type = 'notfound';
 
     if ( $wp_query->is_page ) {
-        $loop = is_front_page() ? 'front' : 'page';
+        $type = is_front_page() ? 'front' : 'page';
     } elseif ( $wp_query->is_home ) {
-        $loop = 'home';
+        $type = 'home';
     } elseif ( $wp_query->is_single ) {
-        $loop = ( $wp_query->is_attachment ) ? 'attachment' : 'single';
+        $type = ( $wp_query->is_attachment ) ? 'attachment' : 'single';
     } elseif ( $wp_query->is_category ) {
-        $loop = 'category';
+        $type = 'category';
     } elseif ( $wp_query->is_tag ) {
-        $loop = 'tag';
+        $type = 'tag';
     } elseif ( $wp_query->is_tax ) {
-        $loop = 'tax';
+        $type = 'tax';
     } elseif ( $wp_query->is_archive ) {
         if ( $wp_query->is_day ) {
-            $loop = 'day';
+            $type = 'day';
         } elseif ( $wp_query->is_month ) {
-            $loop = 'month';
+            $type = 'month';
         } elseif ( $wp_query->is_year ) {
-            $loop = 'year';
+            $type = 'year';
         } elseif ( $wp_query->is_author ) {
-            $loop = 'author';
+            $type = 'author';
         } else {
-            $loop = 'archive';
+            $type = 'archive';
         }
     } elseif ( $wp_query->is_search ) {
-        $loop = 'search';
+        $type = 'search';
     } elseif ( $wp_query->is_404 ) {
-        $loop = 'notfound';
+        $type = 'notfound';
     }
 
-    return $loop;
+    return $type;
 }
 
 

@@ -4,7 +4,6 @@ require_once('func/_register.php');
 require_once('func/_global.php');
 require_once('func/_menu.php');
 require_once('func/_head.php');
-require_once('func/_title.php');
 require_once('func/_body.php');
 require_once('func/_child.php');
 require_once('func/_emoji.php');
