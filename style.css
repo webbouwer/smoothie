@@ -11,3 +11,14 @@ License URI: http://www.gnu.org/licenses/gpl-3.0.html
 Text Domain: customweb
 Tags: theme-options, custom-menu, full-width-template, featured-image-header, featured-images
 */
+
+* {
+list-style:none;
+padding:0;
+margin:0;
+}
+html,
+body
+{
+
+}

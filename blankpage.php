@@ -1,5 +1,8 @@
 <?php
-
+/**
+ * Template Name: Blank Page
+ * Theme main index file
+ */
 require_once('functions.php');
 
 /* html head body/html start tag */
